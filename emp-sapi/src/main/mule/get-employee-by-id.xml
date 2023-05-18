@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="get-employee-by-idFlow" doc:id="ce43fd09-6102-4c2e-bab3-dc02676e06c7" >
+		<http:listener doc:name="Get Employee Listener" doc:id="ac88ee53-39e1-4ba6-9d50-baf375f1ab2b" config-ref="HTTP_Listener_config" path="get-employee" allowedMethods="GET"/>
+		<logger level="INFO" doc:name="Start Log" doc:id="7f12e11a-24e7-48c4-8e58-d1eb4a5882e8" message="Process has started"/>
+		<db:select doc:name="Select Employee" doc:id="1d32fd8f-31b4-4054-a8bd-a94b4d2dbfd7" config-ref="Database_Config">
+			<db:sql ><![CDATA[select emp_Id, emp_Name, emp_Status from emp where emp_Id= :empID]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	empID: attributes.queryParams.employeeID
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="2b6fc28f-ebec-400d-a9ac-13b9d32ec17c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	employeeID: payload[0].EMP_ID,
+	employeeName: payload[0].EMP_NAME,
+	employeeStatus: payload[0].EMP_STATUS
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End Log" doc:id="880461e4-ed76-4eea-b4d4-efe0ffda7201" message="process completed"/>
+	</flow>
+</mule>

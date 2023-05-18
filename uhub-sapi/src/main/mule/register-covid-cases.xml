@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="435e70e0-f95c-4931-99cb-76dd97e3836e" >
+		<db:oracle-connection host="localhost" user="system" password="123456" />
+	</db:config>
+	<flow name="register-covid-casesFlow" doc:id="1de420a6-44d5-4139-b268-a5b30ad855ab" >
+		<http:listener doc:name="Listener" doc:id="e1d5b575-2ff7-4932-9871-50b19ed56dd3" config-ref="HTTP_Listener_config" path="v1/cases" allowedMethods="POST"/>
+		<ee:transform doc:name="Transform Message" doc:id="46e4614d-8401-4ae9-9585-07046dbcdbef" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:insert doc:name="Insert" doc:id="5ec2ede1-d7d8-49c6-9742-7716639ceedf" config-ref="Database_Config" autoGenerateKeys="true">
+			<db:sql ><![CDATA[insert into cvd_case_master (source, case_type, first_name, last_name, phone, email, national_id, nationa,st, city, state, postal, country, create_by, update_by) values (:Source, :casetype, :firstname, :lastname, :phone, :email, :nid, :nid_type, :st_add, :city,:state,:postal,:country, :createby, :updateby)]]></db:sql>
+			<db:parameter-types />
+		</db:insert>
+	</flow>
+</mule>

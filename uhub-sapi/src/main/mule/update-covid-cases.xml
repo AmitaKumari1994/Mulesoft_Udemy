@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="update-covid-casesFlow" doc:id="1c5f1003-ad65-43a9-95aa-86c418d0063a" >
+		<http:listener doc:name="Listener" doc:id="a62c5345-53de-4764-8a3e-663e23976cfb" config-ref="HTTP_Listener_config" path="v1/cases" allowedMethods="PUT"/>
+		<logger level="INFO" doc:name="Logger" doc:id="30d7edbc-4a0d-42f8-8511-8a943fbfa2cd" message="#[payload.covidcases.employeeID.@ID]"/>
+	</flow>
+</mule>

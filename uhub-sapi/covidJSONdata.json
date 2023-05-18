@@ -1,0 +1,18 @@
+{
+"source": "Hospital 1",
+"caseType": "-ve",
+"Fname": "Amita",
+"Lname": "Gupta",
+"phone": "5769098",
+"email": "a@gmial.com",
+"dob": "1993-08-16",
+"nationalID": "234-2421-133",
+"nationalIdType": "SSN",
+"Address": {
+    "streetAddess": "nxjcn 9n8n kxsdf",
+    "city": "nokha",
+    "state": "bihar",
+    "postal": "79876",
+    "country": "India"
+}
+}

@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Definition for fields used in the logger message processor",
+  "type": "object",
+  "properties": {
+    "priority": {
+      "type": "string",
+      "javaType": "org.mule.extension.jsonlogger.api.pojos.Priority",
+      "enum": [
+        "DEBUG",
+        "TRACE",
+        "INFO",
+        "WARN",
+        "ERROR"
+      ],
+      "sdk": {
+        "default": "INFO",
+        "summary": "Logger priority"
+      },
+      "note": "This field is mandatory. DON'T REMOVE"
+    },
+    "tracePoint": {
+      "type": "string",
+      "javaType": "org.mule.extension.jsonlogger.api.pojos.TracePoint",
+      "enum": [
+        "START",
+        "BEFORE_TRANSFORM",
+        "AFTER_TRANSFORM",
+        "BEFORE_REQUEST",
+        "AFTER_REQUEST",
+        "FLOW",
+        "END",
+        "EXCEPTION"
+      ],
+      "sdk": {
+        "default": "START",
+        "summary": "Current processing stage"
+      }
+    },
+    "message": {
+      "type": "string",
+      "sdk": {
+        "example": "Add a log entry",
+        "required": true,
+        "summary": "Message to be logged"
+      }
+    },
+    "content": {
+      "type": "string",
+      "javaType": "org.mule.runtime.extension.api.runtime.parameter.ParameterResolver<org.mule.runtime.api.metadata.TypedValue<Object>>",
+      "sdk": {
+        "default": "#[output application/json ---\n{\n \tpayload: payload }]",
+        "summary": "Remove if no content should be logged",
+        "isContent": true
+      }
+    },
+    "encryptContent": {
+      "type": "boolean",
+      "javaType": "boolean",
+      "sdk": {
+        "default": false,
+        "summary": "Encrypt content in log",
+        "expressionSupport": "NOT_SUPPORTED"
+      }
+    },
+    "encryptionKey": {
+      "type": "string",
+      "sdk": {
+        "required": false,
+        "expressionSupport": "NOT_SUPPORTED"
+      }
+    },
+    "category": {
+      "type": "string",
+      "sdk": {
+        "required": false,
+        "summary": "If not set, by default will log to the org.mule.extension.jsonlogger.JsonLogger category"
+      },
+      "note": "This field is mandatory. DON'T REMOVE"
+    },
+    "correlationId": {
+      "type": "string",
+      "sdk": {
+        "default": "#[correlationId]",
+        "placement": {
+          "tab": "Advanced"
+        }
+      }
+    }
+  }
+}

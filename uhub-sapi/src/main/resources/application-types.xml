@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="Json-metadata" format="json">
+      <types:shape format="weave" example="examples/jsonData-payload.json"><![CDATA[%dw 2.0
+
+type Json_metadata = {|
+  employeeID: Number {"typeId": "int"}, 
+  employeeStatus: String, 
+  employeeName: String, 
+  Address: {|
+    code: String, 
+    pin: Number {"typeId": "int"}, 
+    road: String
+  |}
+|} {"example": "{\\\"employeeID\\\":100,\\\"employeeStatus\\\":\\\"India\\\",\\\"employeeName\\\":\\\"ABC\\\",\\\"Address\\\":{\\\"code\\\":\\\"A\\\",\\\"pin\\\":90809,\\\"road\\\":\\\"cvzxcx\\\"}}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="xml-metadata" format="xml">
+      <types:example format="xml" element="covid-cases" location="examples/xmlData-payload.xml"/>
+    </types:type>
+    <types:type name="inputJSON" format="json">
+      <types:shape format="weave" example="examples/covidJSONdata.json"><![CDATA[%dw 2.0
+
+type inputJSON = {|
+  source: String, 
+  caseType: String, 
+  Fname: String, 
+  Lname: String, 
+  phone: String, 
+  email: String, 
+  dob: String, 
+  nationalID: String, 
+  nationalIdType: String, 
+  Address: {|
+    streetAddess: String, 
+    city: String, 
+    state: String, 
+    postal: String, 
+    country: String
+  |}
+|} {"example": "{\\\"source\\\":\\\"Hospital 1\\\",\\\"caseType\\\":\\\"-ve\\\",\\\"Fname\\\":\\\"Amita\\\",\\\"Lname\\\":\\\"Gupta\\\",\\\"phone\\\":\\\"5769098\\\",\\\"email\\\":\\\"a@gmial.com\\\",\\\"dob\\\":\\\"1993-08-16\\\",\\\"nationalID\\\":\\\"234-2421-133\\\",\\\"nationalIdType\\\":\\\"SSN\\\",\\\"Address\\\":{\\\"streetAddess\\\":\\\"nxjcn 9n8n kxsdf\\\",\\\"city\\\":\\\"nokha\\\",\\\"state\\\":\\\"bihar\\\",\\\"postal\\\":\\\"79876\\\",\\\"country\\\":\\\"India\\\"}}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#6345dcf9-ce14-43e8-a31b-86d10b3cfe39">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="Json-metadata"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="xml-metadata"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

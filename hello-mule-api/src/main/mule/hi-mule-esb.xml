@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="hello-mule-apiFlow1" doc:id="95ae76dd-be59-46bf-ab15-99fc54685f16" >
+		<http:listener doc:name="Listener" doc:id="d8f0673f-f74f-4171-a252-44f315d352e2" config-ref="HTTP_Listener_config" path="/hello-esb"/>
+		<logger level="INFO" doc:name="Logger" doc:id="c0673d28-d598-4815-ad0c-b2e248b95051" message="This is an example of two listener with same base path but different sub-path"/>
+	</flow>
+	
+	
+</mule>

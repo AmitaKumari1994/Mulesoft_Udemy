@@ -1,0 +1,23 @@
+{
+  "configs": [
+    "exceptionhandler.xml"
+  ],
+  "secureProperties": [],
+  "redeploymentEnabled": true,
+  "name": "d3d83e42-4755-45b8-96b1-e79da744fb32:exceptionhandler:2.0.0",
+  "minMuleVersion": "4.2.2",
+  "requiredProduct": "MULE_EE",
+  "classLoaderModelLoaderDescriptor": {
+    "id": "mule",
+    "attributes": {
+      "exportedResources": [
+        "CoreErrorMapping.json",
+        "exceptionhandler.xml"
+      ]
+    }
+  },
+  "bundleDescriptorLoader": {
+    "id": "mule",
+    "attributes": {}
+  }
+}

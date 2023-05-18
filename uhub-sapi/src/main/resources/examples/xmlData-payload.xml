@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<covid-cases>
+	<employeeID>100</employeeID>
+	<employeeName>ABC</employeeName>
+	<Address>
+		<code>A</code>
+		<pin>90809</pin>
+	</Address>
+</covid-cases>

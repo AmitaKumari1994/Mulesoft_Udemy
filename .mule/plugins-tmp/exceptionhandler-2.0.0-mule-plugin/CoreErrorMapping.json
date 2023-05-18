@@ -1,0 +1,47 @@
+[
+    {
+      "type": "DB:CONNECTIVITY",
+      "httpCode": 404,
+      "errorMsg": "Error in connecting Database"
+    },
+    {
+      "type": "SALESFORCE:CONNECTIVITY",
+      "httpCode": 403,
+      "errorMsg": "Retry exhausted for 5 times"
+    },
+    {
+      "type": "APP:BusinessError",
+      "httpCode": 305,
+      "errorMsg": "Business Error"
+    },
+    {
+      "type": "HTTP:CONNECTIVITY",
+      "httpCode": 403,
+      "errorMsg": "Error in Connecting"
+    },
+    {
+      "type": "HTTP:NOT_FOUND",
+      "httpCode": 404,
+      "errorMsg": "Request not Found"
+    },
+     {
+      "type": "HTTP:BAD_REQUEST",
+      "httpCode": 400,
+      "errorMsg": "Request not Found"
+    },
+    {
+      "type": "HTTP:UNAUTHORIZED",
+      "httpCode": 401,
+      "errorMsg": "Request Unauthorized"
+    },
+    {
+      "type": "MULE:EXPRESSION",
+      "httpCode": 500,
+      "errorMsg": "Something went wrong in Dataweave"
+    },
+    {
+    "type": "default",
+    "httpCode": 500,
+    "errorMsg": "Something went wrong !!"
+  }
+]

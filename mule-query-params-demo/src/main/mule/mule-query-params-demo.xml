@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="4d5945bd-70d7-427b-8fa9-d1fed092580f" basePath="mule-message-structure-demo" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="mule-query-params-demoFlow" doc:id="ccb35610-d153-4ebf-9c9e-72bf565bc996" >
+		<http:listener doc:name="Listener" doc:id="2061d84f-f99b-470f-b4b4-8d3612511a4e" config-ref="HTTP_Listener_config" path="read-query-params/{empID}/{empName}/{empStatus}" allowedMethods="GET"/>
+		<logger level="INFO" doc:name="Logger" doc:id="3b98461c-ec6d-455f-b372-e16ec3e6a9f4" message="#[attributes.uriParams.empID]"/>
+	</flow>
+</mule>

@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+
+	<configuration doc:name="Configuration" doc:id="927d88df-1df8-4e0c-966a-170b42c4d766" defaultErrorHandler-ref="coreExceptionHandler" />
+	<email:smtp-config name="Email_SMTP" doc:name="Email SMTP" doc:id="07825432-bd57-424e-915f-89ccf655db65" >
+		<email:smtp-connection host="smtp.mailtrap.io" port="2525" user="3f6cec544972c7" password="d4b06190bd4788" />
+	</email:smtp-config>
+	<os:object-store name="appDefinedOS" doc:name="Object store" doc:id="389e8b40-adb6-4050-b678-83d7fb5ff02b" />
+	<sub-flow name="build-error-response" doc:id="b91dd824-5001-4c25-a095-7802a48792ef" >
+		<ee:transform doc:name="Build Error Response" doc:id="57685714-61f8-4a61-a9df-2babb5aacdb0">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "errorCode": p('errorCode'),
+	"description":{
+		"env" : p('env'),
+		"correlationId": correlationId,
+		"message": payload.errorMsg default payload.rootCause
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="clean-up" doc:id="85bde2fe-bedb-4f9b-aa8a-b7b5f5cfeb25" >
+		<ee:transform doc:name="Removes Type &amp; Email from Payload" doc:id="684ef8c0-7961-445d-a9b5-16f02f832ff5">
+						<ee:message>
+							<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload - "type" - "sentEmail"]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+		<remove-variable doc:name="Remove Variable :: isAppErrorDefined" doc:id="402b8bfa-ec07-4df8-8b81-bfc107b8a6c8" variableName="isAppErrorDefined" />
+	</sub-flow>
+	<error-handler name="coreExceptionHandler" doc:id="17ead3c4-79d7-44d4-9708-a7643ba60d8d" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="3d4badf9-71d4-4d0e-809d-bbae51cdfd9e" >
+			<ee:transform doc:name="Create Payload" doc:id="5195d488-4dbc-4af2-8faa-a3159ca8b3b2" >
+				
+				<ee:variables >
+					<ee:set-variable variableName="marker" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	apiName: vars.appName default "",
+    errorType : error.errorType.namespace  default "" ++ ':' ++ error.errorType.identifier default ""
+}]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="Invoke fetchErrorEntryFlow" doc:id="ccb3f275-f167-4635-81ed-13101e800fa1" name="fetchErrorEntryFlow"/>
+		</on-error-propagate>
+	</error-handler>
+	<!-- flow name="exceptionhandlerFlow" doc:id="cfc1c37d-dede-468f-a348-baa460cfc36f" >
+		<http:listener doc:name="Listener" doc:id="ddbdcb62-604b-4c05-925c-76b8e1990f9e" config-ref="HTTP_Listener_config" path="/test"/>
+		<validation:is-number doc:name="Is number" doc:id="249ad42a-e0f4-42af-a18e-547b55e8a072" value="#[payload]" numberType="INTEGER">
+			<error-mapping targetType="APP:BusinessError" />
+		</validation:is-number>
+	</flow-->
+	<flow name="fetchErrorEntryFlow" doc:id="2ae12eeb-ef83-432c-ac78-19c83735982b" >
+		<set-variable value="true" doc:name="isAppErrorDefined :: True" doc:id="ae79ff8e-8ba5-493b-b2f7-f022d596ad61" variableName="isAppErrorDefined"/>
+		<try doc:name="Try" doc:id="45586205-88e3-4bc5-95d6-72a76dccdf43" >
+			<file:read doc:name="Application Defined Error File" doc:id="f2cfb152-fa4e-44ea-898f-54caf8452311" path="#[Mule::p('app.home') ++ '/ErrorMapping.json']" />
+			<ee:transform doc:name="Transform Message :: lookup APP defined exception" doc:id="153698a1-6298-4102-874c-e5d0a8875ba7">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+
+
+
+//var defaultErrortag = payload."default" deafault { "httpCode": 500, "errorMsg": "Somthing went wrong in APP.Contact Admin !!" }
+
+fun trimAndUpperCase(element) = if(element != null and element != "") upper(trim(element)) else ''
+
+fun readPayload() = do {
+	if(typeOf(payload) ~= "String")
+      read(payload,"application/json")
+    else payload
+}
+
+fun extractError() = do {
+flatten((readPayload() mapObject (value,key) -> {
+     ((key) : value) if ( trimAndUpperCase(key as String) ~= trimAndUpperCase(vars.marker.apiName))
+})pluck($)) filter (trimAndUpperCase($."type") ~= trimAndUpperCase(vars.marker.errorType))
+}
+
+fun buildErrorMsg() = do {
+    var data = extractError()
+    ---
+    if (isEmpty(data)) ""
+    else data[0] ++ {'rootCause' : error.description}
+}
+
+
+output application/json
+---
+
+buildErrorMsg() //++ {'rootCause' : error.errorMessage}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			<!-- <choice doc:name="Choice" doc:id="90643271-e70d-4641-a08c-5b5eaff2d4e0" >
+				<when expression='#[payload.sentEmail ~= "Y"]'>
+					<async doc:name="Async" doc:id="39056d41-f934-4b68-81ef-9072385c31db" >
+						<try doc:name="Try" doc:id="ff14b38f-6200-43ae-8e57-855e1570ad6f" >
+							<email:send doc:name="Send Email for App Defined Errors" doc:id="b0a6659d-854f-4130-aadc-6d49564a715f" config-ref="Email_SMTP" fromAddress="no-reply@m.mail.com" subject="#['Error :: ' ++ error.description as String]">
+						<email:to-addresses>
+								<email:to-address value="debojyoti.c@pwc.com" />
+							</email:to-addresses>
+							<email:body>
+							<email:content><![CDATA[#[error.detailedDescription]]]></email:content>
+						</email:body>
+					</email:send>
+							<error-handler >
+								<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="cd597d24-30bc-4d52-853b-4ed707ca3248" >
+									<logger level="ERROR" doc:name="Logger" doc:id="11a52538-b252-4285-8e4c-62a89adf1226" message="#['Error in sending email' ++ error.detailedDescription as String]"/>
+								</on-error-continue>
+							</error-handler>
+						</try>
+					</async>
+				</when>
+				<otherwise >
+					<logger level="DEBUG" doc:name="Logger" doc:id="a4a7988c-98f9-4efc-86ed-a5fb48545aa6" message="Email flat is not set for APP defined errors"/>
+				</otherwise>
+			</choice> -->
+			<error-handler >
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="c2337221-cf40-43eb-bf47-f2fbc3bc7a54" >
+					<set-variable value="false" doc:name="isAppErrorDefined :: False" doc:id="b4a3fb7f-5313-422a-bc61-419f6867b0e1" variableName="isAppErrorDefined" />
+				</on-error-continue>
+			</error-handler>
+		</try>
+		<choice doc:name="Choice" doc:id="4c2abbb7-1514-4590-8f5e-b79b36d24614" >
+			<when expression="#[vars.isAppErrorDefined ~= 'false' or isEmpty(payload)]">
+				<ee:cache doc:name="Cache" doc:id="d3c755db-28c2-45a3-961f-21a80bb8a07b" >
+					<ee:transform doc:name="Transform Message :: Read CoreException File" doc:id="da188ac1-9b31-4596-b7d6-3e1be059637c">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+readUrl("classpath://CoreErrorMapping.json", "application/json")]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				</ee:cache>
+				<ee:transform doc:name="Core Error :: Transform Message" doc:id="d4b60e66-6e6d-444b-a962-4ebdd73c6ad6" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+
+var defaultErrortag = payload filter($."type" ~= "default") 
+
+fun trimAndUpperCase(element) = if(element != null and element != "") upper(trim(element)) else ''
+
+fun extractError() = do {
+ payload filter ( trimAndUpperCase($."type") ~= trimAndUpperCase(vars.marker.errorType))
+}
+
+fun buildErrorMsg() = do {
+    var data = extractError()
+    ---
+    if (isEmpty(data)) defaultErrortag [0] - "type"
+    else data[0] - "type"
+}
+
+
+output application/json
+---
+
+buildErrorMsg()++ {'rootCause' : error.description}
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<logger level="DEBUG" doc:name="Logger" doc:id="1d660476-4a49-45db-a369-a9fa22c9be7e" message="Core Exception is considered."/>
+			</when>
+			<otherwise >
+				<logger level="DEBUG" doc:name="Logger" doc:id="eea38aef-a71a-45be-8160-367c075e1304" message="App defined exception is considered."/>
+			</otherwise>
+		</choice>
+		<flow-ref doc:name="Flow Reference :: Clean Up" doc:id="2432a1f1-652a-4ac9-8a03-d6a43e8d8469" name="clean-up" />
+		<set-variable value="#[payload.httpCode]" doc:name="Set Variable :: HTTP Error Code" doc:id="99a9ec26-5194-4018-bfdd-109a0016c45f" variableName="httpStatus"/>
+		<flow-ref doc:name="Invoke build-error-response" doc:id="3b15b6c1-dcfe-4c04-8d29-879fb07be19e" name="build-error-response" />
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="caa05c23-7e64-4e5b-868d-b831ed89c36c" >
+				<ee:transform doc:name="Transform Message" doc:id="ad5f5a22-d3a1-4d2c-b300-4ec3c3b2ab4c" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+ {
+    "httpCode": 500,
+    "errorMsg": "Somthing went wrong !!"
+  }]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="#[payload.httpCode]" doc:name="Set Variable :: HTTP Error Code" doc:id="cbb3fb5f-a3cd-44a2-9536-467e9ca7a8d9" variableName="httpStatus" />
+				<flow-ref doc:name="Flow Reference" doc:id="a02f57dd-77b5-486f-b8f0-abf2f4e1c17a" name="build-error-response" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<!--flow name="exceptionhandlerFlow" doc:id="8308fe4f-17bc-4479-b533-eafd8a642ba9" >
+		<http:listener doc:name="Listener" doc:id="fbfbafe4-2dea-43f7-923b-5273d153eed8" config-ref="HTTP_Listener_config" path="/exception-test"/>
+		<validation:is-number doc:name="Is number" doc:id="9160d112-7e0f-414e-9365-00981ca93984" value="#[payload]" numberType="INTEGER">
+			<error-mapping targetType="APP:BusinessError" />
+		</validation:is-number>
+	</flow-->
+</mule>

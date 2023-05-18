@@ -1,0 +1,10 @@
+{
+    "employeeID":100,
+    "employeeStatus":"India",
+    "employeeName":"Ayaan",
+    "Address":{
+        "code":"A",
+        "pin":90809,
+        "road":"cvzxcx"
+    }
+}
